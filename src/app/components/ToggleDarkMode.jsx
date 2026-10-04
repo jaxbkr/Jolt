@@ -1,21 +1,33 @@
 "use client";
-import React, { useState, useEffect } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faSun, faMoon } from "@fortawesome/free-solid-svg-icons";
+import { useEffect, useState } from "react";
 export default function ToggleDarkMode() {
-  const [darkMode, setDarkMode] = useState(false);
-
+  const [dark, setDark] = useState(false);
   useEffect(() => {
-    if (darkMode) {
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-    }
-  }, [darkMode]);
-
+    let value = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    try {
+      const saved = localStorage.getItem("jolt-theme");
+      if (saved) value = saved === "dark";
+    } catch {}
+    setDark(value);
+    document.documentElement.classList.toggle("dark", value);
+  }, []);
+  function toggle() {
+    const value = !dark;
+    setDark(value);
+    document.documentElement.classList.toggle("dark", value);
+    try {
+      localStorage.setItem("jolt-theme", value ? "dark" : "light");
+    } catch {}
+  }
   return (
-    <div>
-      <button onClick={() => setDarkMode(!darkMode)}><FontAwesomeIcon className="size-12" icon={ darkMode ? faSun : faMoon }/></button>
-    </div>
+    <button
+      className="theme-button"
+      onClick={toggle}
+      aria-label={dark ? "Use light theme" : "Use dark theme"}
+      aria-pressed={dark}
+    >
+      {dark ? "☀" : "☾"}
+      <span>{dark ? "Light" : "Dark"}</span>
+    </button>
   );
 }

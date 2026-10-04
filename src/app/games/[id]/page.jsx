@@ -1,127 +1,115 @@
+import Link from "next/link";
+import { notFound } from "next/navigation";
 import { fetchGameById } from "../../utils/fetchGameById";
 import { fetchTeamStatistics } from "../../utils/fetchTeamStatistics";
-
+import { DataUnavailable, Empty, PageHeading } from "../../components/DataUI";
 export default async function Page({ params }) {
-  const gameData = await fetchGameById(params.id);
-  const game = gameData[0];
-  const teamStatsReponse = await fetchTeamStatistics(params.id);
-
+  let game, stats;
+  try {
+    game = (await fetchGameById(params.id))[0];
+  } catch {
+    return <DataUnavailable />;
+  }
+  if (!game) notFound();
+  try {
+    stats = await fetchTeamStatistics(params.id);
+  } catch {
+    stats = null;
+  }
+  const season = game.league?.season;
+  const columns = [
+    ["Q1", "quarter_1"],
+    ["Q2", "quarter_2"],
+    ["Q3", "quarter_3"],
+    ["Q4", "quarter_4"],
+    ["OT", "overtime"],
+    ["Total", "total"],
+  ];
   return (
-    <div className="dark:bg-gray-800 bg-white dark:text-white pt-20 space-y-4">
-      <h2 className="text-4xl font-bold text-center mb-10">Game Stats</h2>
-      <div
-        key={game.id}
-        className="dark:bg-gray-800 bg-white rounded-lg border border-gray-200 shadow-md"
+    <div className="page">
+      <Link
+        className="back-link"
+        href={season ? `/games?season=${season}` : "/games"}
       >
-        <div className="p-4 flex justify-between items-center">
-          <div className="flex items-center">
-            <img
-              src={game.teams.away.logo}
-              alt={game.teams.away.name}
-              className="h-12 w-12 mr-2"
-            />
-            <span className="text-lg font-bold">{game.teams.away.name}</span>
-          </div>
-          <div className="flex items-center">
-            <span className="text-lg ml-2">{game.scores.away.overtime}</span>
-            <span className="text-lg ml-2">{game.scores.away.quarter_4}</span>
-            <span className="text-lg ml-2">{game.scores.away.quarter_3}</span>
-            <span className="text-lg ml-2">{game.scores.away.quarter_2}</span>
-            <span className="text-lg ml-2">{game.scores.away.quarter_1}</span>
-            <span className="text-lg font-bold ml-2">
-              {game.scores.away.total}
-            </span>
-          </div>
-        </div>
-        <div className="p-4 flex justify-between items-center">
-          <div className="flex items-center">
-            <img
-              src={game.teams.home.logo}
-              alt={game.teams.home.name}
-              className="h-12 w-12 mr-2"
-            />
-            <span className="text-lg font-bold">{game.teams.home.name}</span>
-          </div>
-          <div className="flex items-center">
-            <span className="text-lg ml-2">{game.scores.home.overtime}</span>
-            <span className="text-lg ml-2">{game.scores.home.quarter_4}</span>
-            <span className="text-lg ml-2">{game.scores.home.quarter_3}</span>
-            <span className="text-lg ml-2">{game.scores.home.quarter_2}</span>
-            <span className="text-lg ml-2">{game.scores.home.quarter_1}</span>
-            <span className="text-lg font-bold ml-2">
-              {game.scores.home.total}
-            </span>
-          </div>
-        </div>
-        <div className="p-4">
-          <div className="dark:text-white">Team Stats:</div>
-          <div className="dark:text-white">
-            {teamStatsReponse.map((teamStats) => (
-              <div
-                key={teamStats.id}
-                className="dark:bg-gray-900 bg-gray-100 rounded-lg border border-gray-200 shadow-md p-4 mb-4"
-              >
-                <div className="flex items-center mb-4">
-                  <img
-                    src={teamStats.team.logo}
-                    alt={teamStats.team.name}
-                    className="h-12 w-12 mr-2"
-                  />
-                  <h3 className="text-lg font-bold">{teamStats.team.name}</h3>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <div className="font-semibold">First Downs</div>
-                    <div>
-                      Passing: {teamStats.statistics.first_downs.passing}
-                    </div>
-                    <div>
-                      Rushing: {teamStats.statistics.first_downs.rushing}
-                    </div>
-                    <div>
-                      Penalties:{" "}
-                      {teamStats.statistics.first_downs.from_penalties}
-                    </div>
-                  </div>
-                  <div>
-                    <div className="font-semibold">Yards</div>
-                    <div>Total: {teamStats.statistics.yards.total} yards</div>
-                    <div>
-                      Passing: {teamStats.statistics.passing.total} yards
-                    </div>
-                    <div>
-                      Rushing: {teamStats.statistics.rushings.total} yards
-                    </div>
-                  </div>
-                  <div>
-                    <div className="font-semibold">Efficiency</div>
-                    <div>
-                      3rd Down:{" "}
-                      {teamStats.statistics.first_downs.third_down_efficiency}
-                    </div>
-                    <div>
-                      4th Down:{" "}
-                      {teamStats.statistics.first_downs.fourth_down_efficiency}
-                    </div>
-                  </div>
-                  <div>
-                    <div className="font-semibold">Turnovers</div>
-                    <div>Total: {teamStats.statistics.turnovers.total}</div>
-                    <div>
-                      Interceptions:{" "}
-                      {teamStats.statistics.turnovers.interceptions}
-                    </div>
-                    <div>
-                      Fumbles Lost:{" "}
-                      {teamStats.statistics.turnovers.lost_fumbles}
-                    </div>
-                  </div>
-                </div>
-              </div>
+        ← All games
+      </Link>
+      <PageHeading
+        eyebrow={`${season || "NFL"} / ${game.game.week || "GAME STATS"}`}
+        title={`${game.teams.away.name} at ${game.teams.home.name}`}
+        description={`${game.game.status?.long || "Scheduled"} · ${game.game.date?.date || "Date TBD"} ${game.game.date?.time || ""} UTC`}
+      />
+      <section className="panel table-scroll">
+        <table>
+          <caption className="sr-only">Quarter by quarter scores</caption>
+          <thead>
+            <tr>
+              <th scope="col">Team</th>
+              {columns.map(([label]) => (
+                <th scope="col" key={label}>
+                  {label}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {["away", "home"].map((side) => (
+              <tr key={side}>
+                <th scope="row">{game.teams[side].name}</th>
+                {columns.map(([label, key]) => (
+                  <td key={key}>
+                    {key === "total" ? (
+                      <strong>{game.scores[side]?.[key] ?? "—"}</strong>
+                    ) : (
+                      (game.scores[side]?.[key] ?? "—")
+                    )}
+                  </td>
+                ))}
+              </tr>
             ))}
-          </div>
-        </div>
+          </tbody>
+        </table>
+      </section>
+      <div className="section-heading">
+        <h2>Inside the numbers</h2>
       </div>
+      {stats?.length ? (
+        <div className="feature-grid">
+          {stats.map((entry, index) => (
+            <section className="panel" key={entry.team?.id || index}>
+              <h2>{entry.team?.name}</h2>
+              <ul className="stat-list">
+                {[
+                  ["Total yards", entry.statistics?.yards?.total],
+                  ["Passing yards", entry.statistics?.passing?.total],
+                  ["Rushing yards", entry.statistics?.rushings?.total],
+                  ["First downs", entry.statistics?.first_downs?.total],
+                  [
+                    "Third down efficiency",
+                    entry.statistics?.first_downs?.third_down_efficiency,
+                  ],
+                  ["Turnovers", entry.statistics?.turnovers?.total],
+                ].map(([label, value]) => (
+                  <li key={label}>
+                    <span>{label}</span>
+                    <strong>{value ?? "—"}</strong>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          ))}
+        </div>
+      ) : (
+        <Empty
+          title={
+            stats === null
+              ? "Team stats are temporarily unavailable"
+              : "Team stats are not available yet"
+          }
+        >
+          Scores remain available above. Detailed statistics depend on game
+          status and provider coverage.
+        </Empty>
+      )}
     </div>
   );
 }

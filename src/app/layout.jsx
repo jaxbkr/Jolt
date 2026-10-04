@@ -1,23 +1,27 @@
 import Sidebar from "./components/Sidebar";
 import Header from "./components/Header";
 import "./globals.css";
-
+export const metadata = {
+  title: "Jolt — Football in focus",
+  description:
+    "Explore NFL teams, games and player statistics. No account needed.",
+};
 export default function RootLayout({ children }) {
   return (
-    <html>
-      <head>
-        <title>Jolt App</title>
-      </head>
-      <body className="duration-100 ">
-        <div className="flex bg-white dark:bg-black min-h-screen">
-          <Sidebar />
-          <div
-            className="flex flex-col flex-grow"
-            style={{ marginLeft: "6rem" }}
-          >
-            <Header />
-            <div className="overflow-auto flex-grow">{children}</div>
-          </div>
+    <html lang="en">
+      <body>
+        <a className="skip-link" href="#main">
+          Skip to content
+        </a>
+        <Sidebar />
+        <div className="app-shell">
+          <Header />
+          <main id="main" tabIndex={-1}>
+            {children}
+          </main>
+          <footer>
+            JOLT <span>Football in focus. Data by API-Sports.</span>
+          </footer>
         </div>
       </body>
     </html>

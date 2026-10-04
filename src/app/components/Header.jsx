@@ -1,19 +1,12 @@
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faBaseball,
-  faBasketball,
-  faFootball,
-} from "@fortawesome/free-solid-svg-icons";
 import ToggleDarkMode from "./ToggleDarkMode";
 export default function Header() {
   return (
-    <div className="bg-gradient-to-r from-purple-400 to-orange-500 text-white h-20 w-full flex justify-around items-center flex-shrink-0">
-      {" "}
-      <FontAwesomeIcon className="size-12" icon={faBaseball} />
-      <FontAwesomeIcon className="size-12" icon={faBasketball} />
-      <p className="text-3xl">JOLT</p>
-      <FontAwesomeIcon className="size-12" icon={faFootball} />
+    <header className="topbar">
+      <span>
+        NFL EXPLORER <span className="topbar-divider">/</span>{" "}
+        <span className="muted">Every detail matters.</span>
+      </span>
       <ToggleDarkMode />
-    </div>
+    </header>
   );
 }
