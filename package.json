@@ -2,14 +2,18 @@
   "name": "jolt",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": "24.x"
+  },
   "scripts": {
+    "test": "node --test tests/*.test.mjs",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
   },
   "dependencies": {
-    "@cloudflare/next-on-pages": "^1.11.0",
+    "@cloudflare/next-on-pages": "1.11.0",
     "@fortawesome/fontawesome-svg-core": "^6.5.2",
     "@fortawesome/free-brands-svg-icons": "^6.5.2",
     "@fortawesome/free-regular-svg-icons": "^6.5.2",

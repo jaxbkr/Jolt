@@ -2,6 +2,17 @@ This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next
 
 ## Getting Started
 
+Use Node.js 24 LTS. With nvm, install and select the project version, then install dependencies:
+
+```bash
+nvm install
+nvm use
+npm ci
+```
+
+Run `npm test` for the API tests and `npm run build` for a production build.
+Configure hosted builds to use Node.js 24 as well.
+
 First, run the development server:
 
 ```bash
