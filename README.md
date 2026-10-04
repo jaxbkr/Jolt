@@ -42,7 +42,24 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 
 ## Deploy on Vercel
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Set `API_KEY` in the Vercel project's environment variables for **Production**
+(and **Preview** if you use preview deployments). Use your direct API-Sports key.
+Jolt sends it to `v1.american-football.api-sports.io` using `x-apisports-key`;
+a RapidAPI subscription key is not interchangeable.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
-chris was here
+Keep the name `API_KEY`. Do not use `NEXT_PUBLIC_API_KEY` or add the key to
+`next.config.mjs`: the credential must stay on the server.
+
+Redeploy after adding or changing the variable. Existing Vercel deployments do
+not receive updated environment variables. Data pages use the Node.js runtime
+and render per request, while API responses retain their explicit cache periods.
+
+If data still fails, inspect Vercel function logs for `[Jolt API]`:
+- Missing `API_KEY`: check the variable's deployment environment and redeploy.
+- HTTP 401/403 or `authentication`: check that the direct API-Sports key is valid.
+- `quota` or `plan`: check the provider allowance and season access.
+
+Diagnostics never print the credential or raw provider error messages.
+
+References: [Vercel environment variables](https://vercel.com/docs/environment-variables/managing-environment-variables),
+[Next.js server environment variables](https://nextjs.org/docs/14/app/building-your-application/configuring/environment-variables).

@@ -5,9 +5,10 @@ import {test} from 'node:test';
 const source=(await readFile(new URL('../src/app/utils/api.js',import.meta.url),'utf8')).replace('import "server-only";','').replaceAll('export async function','async function');
 function client(data,{key='fixture-only',ok=true}={}) {
  const calls=[];
- const context=vm.createContext({URLSearchParams,AbortSignal,process:{env:{API_KEY:key}},fetch:async(url,options)=>{calls.push({url,options});return {ok,json:async()=>data};}});
+ const logs=[];
+ const context=vm.createContext({console:{error:(message)=>logs.push(message)},URLSearchParams,AbortSignal,process:{env:{API_KEY:key}},fetch:async(url,options)=>{calls.push({url,options});return {ok,json:async()=>data};}});
  vm.runInContext(source,context);
- return {api:context.api,seasonContext:context.seasonContext,calls};
+ return {api:context.api,seasonContext:context.seasonContext,calls,logs};
 }
 test('current season wins over newer announced year and historical selection persists',async()=>{
  const c=client({response:[{seasons:[{year:2027,current:false},{year:2026,current:true},{year:2023,current:false}]}]});
@@ -35,4 +36,17 @@ test('uses direct-provider authentication and encodes filters',async()=>{
  assert.equal(c.calls[0].options.headers['x-apisports-key'],'fixture-only');
  assert.match(c.calls[0].url,/team=a%26b/);
  assert.equal(c.calls[0].options.next.revalidate,900);
+});
+
+test('trims Vercel key whitespace and rejects whitespace-only configuration',async()=>{
+ const c=client({response:[]},{key:'  fixture-only\n'});await c.api('teams');
+ assert.equal(c.calls[0].options.headers['x-apisports-key'],'fixture-only');
+ const missing=client({}, {key:' \n'});await assert.rejects(missing.api('teams'),/not connected/);
+ assert.equal(missing.calls.length,0);assert.match(missing.logs[0],/API_KEY is missing/);
+});
+test('diagnostics identify provider failures without exposing response text or key',async()=>{
+ const c=client({errors:{token:'secret-value'},response:[]},{key:'secret-value'});
+ await assert.rejects(c.api('teams'),/provider/);
+ assert.match(c.logs[0],/authentication/);
+ assert.ok(!c.logs.join('').includes('secret-value'));
 });

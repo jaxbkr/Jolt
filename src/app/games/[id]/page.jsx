@@ -1,3 +1,7 @@
+// Read server environment at request time; explicit API fetch caches still apply.
+export const runtime = "nodejs";
+export const revalidate = 0;
+
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { fetchGameById } from "../../utils/fetchGameById";
