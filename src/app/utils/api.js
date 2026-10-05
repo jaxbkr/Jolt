@@ -29,9 +29,16 @@ export async function api(path, params = {}, revalidate = 900) {
   return data.response;
 }
 export async function seasonContext(requested) {
+  // Default to the account's confirmed free-plan range, not every published year.
+  const minSeason = Number(process.env.API_MIN_SEASON ?? 2022);
+  const maxSeason = Number(process.env.API_MAX_SEASON ?? 2024);
+  if (!Number.isInteger(minSeason) || !Number.isInteger(maxSeason) ||
+      minSeason < 1900 || maxSeason < minSeason || maxSeason > 9999) {
+    throw new Error("Football season access is not configured correctly.");
+  }
   const leagues = await api("leagues", { id: 1 }, 86400);
   const seasons = (leagues[0]?.seasons || [])
-    .filter((s) => Number.isInteger(s.year))
+    .filter((s) => Number.isInteger(s.year) && s.year >= minSeason && s.year <= maxSeason)
     .sort((a, b) => b.year - a.year);
   if (!seasons.length) throw new Error("No NFL seasons are available.");
   const selected =

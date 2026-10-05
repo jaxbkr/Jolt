@@ -59,6 +59,13 @@ If data still fails, inspect Vercel function logs for `[Jolt API]`:
 - HTTP 401/403 or `authentication`: check that the direct API-Sports key is valid.
 - `quota` or `plan`: check the provider allowance and season access.
 
+Jolt defaults to seasons **2022–2024**, the range confirmed by this account's
+free-plan error. It selects the latest accessible season (2024) and filters the
+season menus to that range. Published league seasons do not prove plan access.
+If your subscription or its allowed years change, set server environment variables
+`API_MIN_SEASON` and `API_MAX_SEASON` to the allowed bounds, then redeploy.
+These bounds restrict historical links as well as automatic selection.
+
 Diagnostics never print the credential or raw provider error messages.
 
 References: [Vercel environment variables](https://vercel.com/docs/environment-variables/managing-environment-variables),
